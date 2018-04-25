@@ -58,7 +58,12 @@ function initHttpServer() {
 
         res.send();
     });
-
+    //钱包查询
+    app.post('/queryWallet', (req, res) => {
+    var address = req.body.address;
+    var amount = blockchain.getBalanceOfAddress(address);
+    res.send(JSON.stringify({"amount":amount}));
+    });
     app.listen(http_port, () => console.log('Listening http on port: ' + http_port));
 }
 /**
@@ -235,9 +240,13 @@ class Blockchain{
 //根据地址处理变化的金额
     getBalanceOfAddress(address){
         let balance = 0;
-
+        
         for(const block of this.chain){
+            console.log("总的交易"+block.transactions)
             for(const trans of block.transactions){
+                console.log("地址"+trans.fromAddress)
+                console.log("地址"+address)
+                console.log("地址是否相等"+trans.fromAddress === address)
                 if(trans.fromAddress === address){
                     balance -= trans.amount;
                 }
