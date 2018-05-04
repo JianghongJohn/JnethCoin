@@ -194,7 +194,7 @@ class Block {
             this.nonce++;
             this.hash = this.calculateHash();
         }
-        console.log("BLOCK MINED: " + this.hash);
+        console.log("找到匹配的hash: " + this.hash);
     }
 }
 /**
@@ -203,7 +203,7 @@ class Block {
 class Blockchain{
     constructor() {
         this.chain = [this.createGenesisBlock()];
-        this.difficulty = 2;
+        this.difficulty = 4;
         // 在区块产生之间存储交易的地方
         this.pendingTransactions = [];
         // 挖矿回报
@@ -223,7 +223,7 @@ class Blockchain{
         let block = new Block(this.chain.length, Date.now(), this.pendingTransactions, this.getLatestBlock().hash);
         block.mineBlock(this.difficulty);
 
-        console.log('Block successfully mined!');
+        console.log('区块创建成功!');
         // 将新挖的看矿加入到链上
         this.chain.push(block);
         // 重置待处理交易列表并且发送奖励(将挖到的信息作为下一次挖矿的交易信息，下一次产生则这个地址获取奖励)
@@ -246,7 +246,7 @@ class Blockchain{
             for(const trans of block.transactions){
                 console.log("地址"+trans.fromAddress)
                 console.log("地址"+address)
-                console.log("地址是否相等"+trans.fromAddress === address)
+                // console.log("地址是否相等 " + trans.fromAddress === address?"是":"否")
                 if(trans.fromAddress === address){
                     balance -= trans.amount;
                 }
@@ -328,16 +328,16 @@ function handleBlockchainResponse (message) {
     var latestBlockHeld = blockchain.getLatestBlock();
     console.log("上一个区块："+latestBlockHeld.index);
     if (latestBlockReceived.index > latestBlockHeld.index) {
-        console.log('blockchain possibly behind. We got: ' + latestBlockHeld.index + ' Peer got: ' + latestBlockReceived.index);
+        // console.log('blockchain possibly behind. We got: ' + latestBlockHeld.index + ' Peer got: ' + latestBlockReceived.index);
         if (latestBlockHeld.previousHash === latestBlockReceived.hash) {
-            console.log("We can append the received block to our chain");
+            console.log("将该区块加入区块链中");
             blockchain.chain.push(latestBlockReceived);
             broadcast(responseLatestMsg());
         } else {
             broadcast(queryAllMsg());
         }
     } else {
-        console.log('received blockchain is not longer than current blockchain. Do nothing');
+        console.log('获取到的区块不比当前长，不做任何操作');
     }
 };
 /**
@@ -354,11 +354,11 @@ function handleTranscation(message) {
  */
 var replaceChain = (newBlocks) => {
     if (isValidChain(newBlocks) && newBlocks.length > blockchain.length) {
-        console.log('Received blockchain is valid. Replacing current blockchain with received blockchain');
+        console.log('替换区块链');
         blockchain = newBlocks;
         broadcast(responseLatestMsg());
     } else {
-        console.log('Received blockchain invalid');
+        console.log('区块链不适合');
     }
 };
 
